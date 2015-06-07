@@ -347,6 +347,10 @@ In addition，we need to integrate third party services into our SaaS plateform,
 
 ### 4.3 Technical architecture
 
+<p style="text-align:center;">
+￼![image](./images/general-architecture.png)
+<p style="text-align:center;"> *Figure 12 - Technical architecture*
+
 
 <div style="page-break-after: always;"></div>
 
@@ -356,11 +360,11 @@ In addition，we need to integrate third party services into our SaaS plateform,
 
 In this chapter, I will analyse the requirement specification of this project.
 
-### 5.1 Presentation du projet
+### 5.1 Presentation of projet
 
 For the part of backend, to cope with the development of product and the introduction of new features, we need to develop new web services in the back-end to support the mobile development.
 
-#### 5.1.1 Contexte du projet
+#### 5.1.1 Context of projet
 
 For this moment, my job involes primarily two parts. First of all, the developemnt of **backend** to support **Smokio app**. Secondly, construct an **observer** website to supply the **Saas service**.
 
@@ -448,17 +452,234 @@ The primary actor is the **observer** that connects to the site web and access t
 
 In this section, I will describe the functions of our system by using some examples.
 
-#### 5.4.1 Backend
+For the part of Backend, all the functional description are listed in our [Web service documentation](https://api-dev.smok.io/doc/).
 
 
+For the part of observer, by using the Flow chart, we can visually observe the workflow of the entire system.
 
-#### 5.4.2 Observer
+<p style="text-align:center;">
+![registration workflow](./images/registration_process_diagram.png)
+<p style="text-align:center;"> *Figure 13 - Observer: registration process workflow*
 
-**a) Product features**
+<p style="text-align:center;">
+![registration workflow](./images/subscription_management_process.png)
+<p style="text-align:center;"> *Figure 13 - Observer: subscription management process workflow*
 
-**Subscription module:**
+#### 5.4.1 Plan Management::PM01
+##### 5.4.1.1 Introduction
 
-- Cha
+We need an interface to manipulate the plans(create, parameter, delete). For the future, we could add the coupon or discount. A plan contains 4 principle parameters: price, frequence, csv authorization, user limit.
+
+We can use the service of stripe for our plan management. It offers a nice interface to manipulate the plan.
+
+##### 5.4.1.2 Inputs
+The inputs are the content of plan.
+In the beginning, we provide 5 type of plan:
+
+
+|    Name    |   Lite  |   Lite+   |  Standard |    Plus    |     Pro     |
+|:----------:|:-------:|:---------:|:---------:|:----------:|:-----------:|
+|    Price   |    0$   | 20$/month | 50$/month | 399$/month | 1000$/month |
+|  Frequence | Forever |  monthly  |  monthly  |   monthly  |   monthly   |
+| User limit |    1    |     10    |     50    |     100    |     300     |
+|     CSV    |    No   |     No    |     No    |     Yes    |     Yes     |
+
+
+##### 5.4.1.3 Processing
+
+Preconditions: Administrator has logged in with the stripe account.
+
+1. Administrator open the stripe [dashboard](https://dashboard.stripe.com/test/plans)
+2. Administrator click the menu "plan"
+3. If we have already the plan, goto step 4, if administrator want to create a new plan, then goto step 6.
+4. Administrator click on the plan name to show the detail of this plan![image](./images/existed_plan.png)
+5. Administrator click "Edit Details" to modify a plan, or click "Delete Plan" to delete a plan.
+6. Administrator click "new"
+7. Administrator fill the form of a plan ![new plan](./images/create_plan.png)
+8. Administrator click "create plan"/"cancel" to confirm or cancel the operation
+
+Postconditions: In dashboard the exist plan is disappeared or a new plan is appeared.
+
+##### 5.4.1.4 Outputs
+
+A new created plan/ A modified plan
+
+##### 5.4.1.5 Error Handling
+
+None, if the stripe server is down, we can't do anything.
+
+- - - -
+#### 5.4.2 Modification in the registration process::PM02
+
+##### 5.4.2.1 Introduction
+
+During the process of registration, we need offre an interface to permit observer to select an plan, and complete the payment securely.
+
+##### 5.4.2.2 Inputs
+
+Observer's selection and his credit card information.
+
+
+##### 5.4.2.3 Processing
+
+Preconditions: Observer has filled his personal information.
+
+1. Observer selects a plan. ![select plan](./images/select_plan.png)
+2. A payment form is displayed.
+3. Observer fills this form with his credit card.
+4. Observer clicks "confirm".
+5. Observer sees the payment information.
+6. Observer clicks "Ok"
+7. It will be redirected to the home page.
+
+Postconditions: The home page is displayed.
+
+##### 5.4.2.4 Outputs
+
+Our stripe account receives money, observer became a subscriber to a plan and has our authorization to access user data.
+
+##### 5.4.2.5 Error Handling
+
+Subscription failed, please retry.
+
+
+- - - -
+#### 5.4.3 Subscription Management::PM03
+##### 5.4.3.1 Introduction
+
+Observer should be able to manage their subscriptions, we need provide an interface to permit them to add more subscriptions, unsubscribe a plan.
+
+Stripe provides the API to manage subscriptions, we need to integrate it.
+
+##### 5.4.3.2 Inputs
+
+Observer's operations
+
+
+##### 5.4.3.3 Processing
+
+Preconditions: Observer has logged in with his account.
+
+1. Observer click "settings" in the top navigation bar.
+2. Observer click the submenu "My subscriptions".
+3. The page "My subscriptions" is displayed, there are some tables that contain detail information(detail about this plan, how many user limit left, can csv or not) for each current subscription.
+4. Observer click the button "Unsubscribe" below a plan, goto step 5, if he want to subscribe more, goto step 9.
+5. A pop up is displayed to ask the confirmation.
+6. If observer confirms the unsubscription.
+7. We stop the recurring his billing for next month.
+8. He will no longer be able to access the service out of his subscription.
+9. Observer click the button "Subscribe more"
+10. Include PM01(Step 1-6).
+
+Postconditions: Update observers' subscriptions and refresh the page "My subscriptions".
+
+##### 5.4.3.4 Outputs
+
+Update observers' subscription relationships, and charge for the new subscription.
+
+##### 5.4.3.5 Error Handling
+
+Subscription failed, please retry.
+
+
+- - - -
+#### 5.4.4 Authorization control
+##### 5.4.4.1 Introduction
+
+After each payment of an observer, we should verify the detail of plan that he has rolled in, then authorize him the corresponding right to access the user data.
+
+Likewise, when an observer unsubscribes a plan, we need to disable his access.
+
+##### 5.4.4.2 Inputs
+
+Observer's successful payments or unsubscription operations.
+
+##### 5.4.4.3 Processing
+
+Preconditions: None
+
+1. Observer subscribes a new plan, goto step 2, if he unsubscribes a plan, goto step 3
+2. Verify the payment, authorize the user limit and access to cvs.
+3. Remove the authorization to this observer.
+
+Postconditions: Update observers' authorizations
+
+##### 5.4.4.4 Outputs
+
+Update observers' authorizations.
+
+##### 5.4.4.5 Error Handling
+
+None.
+
+
+- - - -
+#### 5.4.5 Recurring the billing
+##### 5.4.4.1 Introduction
+
+Every month, we need to charge for an observer’s bill automatically. If an observer has stop his subscription, we will stop the charge for the corresponding plan too.
+
+Stripe can recur the billing automatically, so we can use their service and integrate their API. 
+##### 5.4.4.2 Inputs
+
+Time changement
+
+##### 5.4.4.3 Processing
+
+Preconditions: Observer has subscribed a plan.
+
+1. Observer's subscription is expired.
+2. Verify this subscription isn't canceled.
+2. Recur the billing for his plan.
+
+Postconditions: None
+
+##### 5.4.4.4 Outputs
+
+Our stripe account receive money for this subscription.
+
+##### 5.4.4.5 Error Handling
+
+None, if the stripe server is down, we can't do anything.
+
+
+- - - -
+#### 5.4.6 Generation and delivery of invoices and receipts
+##### 5.4.4.1 Introduction
+
+Once an observer is charged for a subscription successfully, we need generate and deliver his invoice and receipt automatically. We have some alternative solutions.
+
+- Ruby has some gems for generating invoice:
+	- [payday](https://github.com/commondream/payday)
+	- [Prawn](http://brandensilva.com/create-a-pdf-invoice-using-prawn-in-rails/)
+
+- Some 3 party services:
+	- [sendWithUs](https://www.sendwithus.com/)
+	- [invoiceninja](https://www.invoiceninja.com/) not free
+	- [invoiced](https://invoiced.com/)
+
+Stripe is able to send the receipt for us, we could integrate it.
+
+##### 5.4.4.2 Inputs
+
+Successful payment.
+
+##### 5.4.4.3 Processing
+
+Preconditions: Observer is charged for his subscription.
+
+1. We generate the invoice and receipt for observer subscription
+2. We send the invoice and receipt to observer by email
+
+Postconditions: None
+
+##### 5.4.4.4 Outputs
+
+Invoices and receipts
+
+##### 5.4.4.5 Error Handling
+
+Retry.
 
 
 <div style="page-break-after: always;"></div>
@@ -553,4 +774,35 @@ Phase 7: Development of Intelligent Coach model (03/07/2015 - 21/08/2015)
 <div style="page-break-after: always;"></div>
 
 
-## 7 Conception
+## 7 System Design
+
+### 7.1 Backend
+
+#### 7.1.1 System architecture
+
+<p style="text-align:center;">
+￼![image](./images/backend-architecture.png)
+<p style="text-align:center;"> *Figure 12 - Backend architecture*
+
+#### 7.1.2 Database model
+
+<p vertical-align="center">
+	<img src="./images/database-schema.png">
+</p>
+<p style="text-align:center;"> *Figure 12 - Backend-Database model*
+
+### 7.2 Observer
+
+#### 7.2.1 System architecture
+
+<p align="center">
+	<img src="./images/architecture.png">
+</p>
+<p style="text-align:center;"> *Figure 12 - Observer architecture*
+
+#### 7.2.2 Database model
+
+<p vertical-align="center">
+	<img src="./images/observer-database-model.png">
+</p>
+<p style="text-align:center;"> *Figure 12 - Observer-Database model*
