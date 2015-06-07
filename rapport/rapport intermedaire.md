@@ -350,24 +350,137 @@ In addition，we need to integrate third party services into our SaaS plateform,
 
 <div style="page-break-after: always;"></div>
 
-## 5 Planning
+
+## 5 Specification
+
+
+In this chapter, I will analyse the requirement specification of this project.
+
+### 5.1 Presentation du projet
+
+For the part of backend, to cope with the development of product and the introduction of new features, we need to develop new web services in the back-end to support the mobile development.
+
+#### 5.1.1 Contexte du projet
+
+For this moment, my job involes primarily two parts. First of all, the developemnt of **backend** to support **Smokio app**. Secondly, construct an **observer** website to supply the **Saas service**.
+
+**a) Backend**
+
+We have already 6 version of **web services**. But as an ambitious and dynamic startup, we iterate frequently our product development. So, my principle task is to maintain and develop **web services**.
+
+To develop more powerful **firmware**, in the current version of **firmware**, we have added some new commands to capture the temperature and power. Along with the developement of new **firmware**, **Smokio app** need do some change to make use of the new features of **firmware** and adapt to the change of **firmware**. All of these, we need backend suppply **web services** that can response the request of **mobile application**.
+
+To support the development of each version of **Smokio app**, I need manage different versions of **web service**, create a new version of web service and can't affect the other version.
+
+If we want to add a new **feature**, for example, "management of different configuration mode of device". I will create a group of web services to implement this feature: device_mode/add.json, device_mode/remove.json, device_mode/list.json, device_mode/update.json, etc.
+
+In addition, all version of **web services** share a same **data model** so that we have to consider the compatibility between different versions. Introduce the new change, without affecting the existing **web services** is the first principle.
+
+**b) Observer**
+
+As the number of users increases, we collect more and more user data. These data can bring **added value** by analyzing the user's usage data to study the working conditions of the electronic cigarette, and health effects of electronic cigarette to users. For the beginning, we just have developed the dashboard for the visualisation of user's usage data, and now We are trying to build our **Observer** platform in the form of SaaS, and to provide our data support to some of electronic cigarette research institutions.
+
+For the access to our users’ usage data, we offer the service to generate a csv file and download it. Taking into account the value of the data, observers need pay for accessing our service.To achieve this purpose, we need assure the security, reliability and availability of system.In the term of security, we should keep all sensitive information (card number, CVC code, etc) safe and invisible during the process of payment. We can’t run a risk of leaking user confidential informations. So we need find a solution with a high security.In consideration of reliability, our payment process need treat every transaction correctly(amount, currency, etc) and have the ability of tracing every transaction and rolling back.For the availability of module, we should simplify the payment process and offer a friendly interface. We need integrate it into our existed observer system. So we want to keep the consistence in the dimension of design.
+
+
+#### 5.1.2 Objectif
+
+**a) Objectifs of Backend**
+
+Objectifs of backend are:
+
+- Development continuous along with the evolution of **firmware** and **mobile application**
+- Compatibility between different versions
+- Maintenance of server and bug fixes
+
+**b) Observer**
+
+Except of the specific authorizations, the other payment process need to be reusable. Because a payment process is the most common module in the e-commerce application, there are already some mature platforms who offer their payment API to integrate in the third party application. We need create an independent payment module who is in charge of the payment process and the integration of the other plugins. It is responsible to invoke payment API to complete the payment, control the authentication, respond to the webhook’s event, generate and deliver the invoice to observer. We need abstract these components for reuse in other payment scenarios.
+
+
+- Implementation of the basic **SaaS** functions (Subscription, Access Control, etc.)
+- Integration of third party plateform (Stripe, SendWithUs)
+- Reimplement the registration process
+- Management of subscription (upgrade, downgrade)
+- Build a well-designed user interface by using **Bootstrap**
+
+The goal of Observer is to construct an user-friendly and high-quality SaaS system and make it treat with payment correctly and safely.
+
+
+### 5.2 Vocabulaire
+
+In order to facilitate communication within the team and the preparation of documents, we have reached agreement with following defined terms:
+
+- Backend:
+- Observer:
+- Web service:
+- API:
+- SaaS:
+- Firmware:
+- Smokio App:
+- mobile application:
+- Smokio:
+
+
+### 5.3 Périmètre
+
+**Backend**
+
+For the moment, the users of web services are the **mobile developers** in our team, and the users of Smokio App are the **end-user** of Smokio who use Smokio to track their smoking.
+
+As the only backend and full-stack developer in our team, I take charge of all the backend and website development.
+
+So the constrain is to prevent other users from requesting our web services by authenticating their identities.
+
+**Observer**
+
+For conventional reason we name each of the user classes-actors with this format:
+
+**System Actors:**
+
+* **Observer**: The observer is the one who want to access our users’ usage data for the purpose of research or commerce. They can join in our plans to get the authorization. The authorization contains the number of users that they can follow and the access to csv file.
+* **User(Patient)**: The user is the one who use our Smokio product and mobile app. These permit us to collect and analyse their usage data. Some of them want to stop smoking and need some professional guidance.
+* **Administrator**: The administrator is our stuffs who are responsible to manage the pricing plan, monitor the payment events and supply the customer support.
+
+The primary actor is the **observer** that connects to the site web and access the data. The term **user** is the data source, they produce the valuable data to observer.
+
+### 5.4 Functional description
+
+In this section, I will describe the functions of our system by using some examples.
+
+#### 5.4.1 Backend
+
+
+
+#### 5.4.2 Observer
+
+**a) Product features**
+
+**Subscription module:**
+
+- Cha
+
+
+<div style="page-break-after: always;"></div>
+
+## 6 Planning
 
 <p style="text-align: justify;">
 This chapter, I will introduce our development planning. We are a small and flexible team. Our schedule isn't always fix. We use the agile development methodology, like Scrum. We iterate very quickly.
 
-### 5.1 Planned schedule
+### 6.1 Planned schedule
 
 <p style="text-align: justify;">
-In gerenal, according to the objective of my intership. I separate my job into 7 phases. As described in figure 5-1.
+In gerenal, according to the objective of my intership. I separate my job into 7 phases. As described in figure 12.
 
 <p style="text-align: justify;">
-Phase 2 and 3 have gone on parallelly, because during the development of a new version application, I will get familiar with our development process and methodology.
+Phase 2 and 3 will go on parallelly, because during the development of a new version application, I will get familiar with our development process and methodology.
 
 <p style="text-align:center;">
 ![image](./images/Diagramme-gantt-previsionnel.png)
 <p style="text-align:center;"> *Figure 12 - Gantt Diagram: planned schedule*
 
-### 5.2 Actual schedule
+### 6.2 Actual schedule
 
 
 phase 1: Handover with former employee（23/02/2015 - 28/02/2015）
@@ -435,3 +548,9 @@ Phase 7: Development of Intelligent Coach model (03/07/2015 - 21/08/2015)
 <p style="text-align:center;">
 ![image](./images/Diagramme-gantt-revise.png)
 <p style="text-align:center;"> *Figure 13 - Gantt Diagram: actual schedule*
+
+
+<div style="page-break-after: always;"></div>
+
+
+## 7 Conception
